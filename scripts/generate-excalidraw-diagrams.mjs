@@ -52,12 +52,14 @@ function common(id, type, x, y, width, height, extra = {}) {
 }
 
 function rect(id, x, y, w, h, label, fill = "#dbeafe", stroke = "#1e3a5f") {
+  const lines = String(label).split("\n").length;
+  const labelHeight = Math.max(28, lines * 24);
   return [
     common(id, "rectangle", x, y, w, h, {
       backgroundColor: fill,
       strokeColor: stroke,
     }),
-    text(`${id}_text`, x + 12, y + h / 2 - 12, w - 24, 30, label, {
+    text(`${id}_text`, x + 12, y + (h - labelHeight) / 2, w - 24, labelHeight, label, {
       fontSize: 17,
       color: "#374151",
       align: "center",
@@ -142,15 +144,16 @@ function diagram1() {
     ...title("Current sequential VMM boot flow", "The monitor is the last opaque execve step, so VMM startup cannot overlap with urunc setup."),
   ];
   const actors = [
-    ["cli", "urunc CLI", 90],
-    ["reexec", "reexec process", 340],
-    ["setup", "network/rootfs/hooks", 620],
-    ["vmm", "VMM process", 900],
-    ["guest", "guest", 1130],
+    ["cli", "urunc CLI", 90, 150],
+    ["reexec", "reexec process", 340, 150],
+    ["setup", "network/rootfs/hooks", 600, 190],
+    ["vmm", "VMM process", 900, 150],
+    ["guest", "guest", 1130, 150],
   ];
-  for (const [id, label, x] of actors) {
-    els.push(...rect(`${id}_actor`, x, 140, 150, 52, label, "#dbeafe"));
-    els.push(line(`${id}_life`, x + 75, 205, x + 75, 760, { strokeStyle: "dashed" }));
+  for (const [id, label, x, w] of actors) {
+    const center = x + w / 2;
+    els.push(...rect(`${id}_actor`, x, 140, w, 52, label, "#dbeafe"));
+    els.push(line(`${id}_life`, center, 205, center, 760, { strokeStyle: "dashed" }));
   }
   const msgs = [
     [210, 165, 415, "start reexec"],
@@ -198,7 +201,7 @@ function diagram2() {
   els.push(arrow("setup_to_start", 740, 292, 770, 398));
   els.push(arrow("ready_to_start", 855, 223, 855, 365));
   els.push(arrow("start_to_guest", 1020, 400, 1100, 400));
-  els.push(text("parallel_note", 380, 340, 380, 48, "Critical path saves the overlapped portion of VMM startup and urunc setup.", { fontSize: 17, color: "#047857" }));
+  els.push(...rect("parallel_note", 360, 345, 365, 78, "Critical path saves overlapped\nVMM startup and urunc setup", "#dcfce7", "#047857"));
   els.push(...code("state_evidence", 80, 500, 1080, 140, `create: monitor may be spawned or paused, but OCI state remains created\nstart: WaitForSocket -> Configure -> StartGuest -> mark running\nfailure: timeout or monitor exit prevents transition to running`));
   return els;
 }
@@ -247,7 +250,7 @@ function diagram4() {
     }));
   }
   els.push(...code("fc_json", 705, 245, 420, 185, `HTTP over Unix socket\n\nPUT /actions\n{\n  "action_type": "InstanceStart"\n}`));
-  els.push(...rect("fc_guard", 700, 470, 430, 70, "StartGuest is the only point where the guest begins execution", "#a7f3d0", "#047857"));
+  els.push(...rect("fc_guard", 700, 470, 430, 84, "StartGuest is the only point where\nthe guest begins execution", "#a7f3d0", "#047857"));
   return els;
 }
 

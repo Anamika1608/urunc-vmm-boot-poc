@@ -2,8 +2,8 @@
   "version": 2,
   "diagrams": {
     "01-current-sequential-boot.excalidraw": {
-      "hash": "sha256:44a7a5edcc7c77f1",
-      "generatedAt": "2026-05-16T16:14:05.888Z",
+      "hash": "sha256:f390d44d87512d30",
+      "generatedAt": "2026-05-16T16:25:47.814Z",
       "outputs": [
         {
           "file": "01-current-sequential-boot-light.png",
@@ -19,12 +19,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1778948040133.2227,
+      "mtimeMs": 1778948745764.6062,
       "size": 30435
     },
     "02-proposed-parallel-boot.excalidraw": {
-      "hash": "sha256:93ce941b15323714",
-      "generatedAt": "2026-05-16T16:14:05.889Z",
+      "hash": "sha256:8ac3c8074d83291f",
+      "generatedAt": "2026-05-16T16:25:47.814Z",
       "outputs": [
         {
           "file": "02-proposed-parallel-boot-light.png",
@@ -40,12 +40,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1778948040133.5027,
-      "size": 19083
+      "mtimeMs": 1778948745764.9956,
+      "size": 19691
     },
     "03-vmm-interface-hierarchy.excalidraw": {
-      "hash": "sha256:75d23bd1d02f5a44",
-      "generatedAt": "2026-05-16T16:14:05.889Z",
+      "hash": "sha256:c29065703600110c",
+      "generatedAt": "2026-05-16T16:25:47.814Z",
       "outputs": [
         {
           "file": "03-vmm-interface-hierarchy-light.png",
@@ -61,12 +61,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1778948040133.8357,
-      "size": 15010
+      "mtimeMs": 1778948745765.4377,
+      "size": 15011
     },
     "04-firecracker-api-sequence.excalidraw": {
-      "hash": "sha256:70bf81aca3cdbff8",
-      "generatedAt": "2026-05-16T16:14:05.889Z",
+      "hash": "sha256:8a7567dbed072d2f",
+      "generatedAt": "2026-05-16T16:25:47.814Z",
       "outputs": [
         {
           "file": "04-firecracker-api-sequence-light.png",
@@ -82,12 +82,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1778948040134.2305,
-      "size": 22471
+      "mtimeMs": 1778948745765.7566,
+      "size": 22473
     },
     "05-qemu-qmp-sequence.excalidraw": {
-      "hash": "sha256:9dba4c4144d47d8e",
-      "generatedAt": "2026-05-16T16:14:05.889Z",
+      "hash": "sha256:7a9d4564f8cf7837",
+      "generatedAt": "2026-05-16T16:25:47.814Z",
       "outputs": [
         {
           "file": "05-qemu-qmp-sequence-light.png",
@@ -103,7 +103,7 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1778948040134.4524,
+      "mtimeMs": 1778948745766.1052,
       "size": 22441
     }
   }
