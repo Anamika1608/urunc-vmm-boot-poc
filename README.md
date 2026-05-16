@@ -24,6 +24,27 @@ The PoC shows the shape of a socket-first design:
 - `cmd/fc-socket-demo`: mock Firecracker API socket demo.
 - `cmd/qmp-demo`: mock QMP handshake demo.
 - `benchmarks`: synthetic sequential versus overlapped timing benchmark.
+- `diagrams/excalidraw`: editable Excalidraw sources and rendered PNG diagrams.
+
+## Diagrams
+
+The proposal uses the rendered Excalidraw diagrams below:
+
+| Diagram | Source | PNG |
+| --- | --- | --- |
+| Current sequential VMM boot flow | `diagrams/excalidraw/01-current-sequential-boot.excalidraw` | `diagrams/excalidraw/01-current-sequential-boot-light.png` |
+| Proposed parallel VMM boot flow | `diagrams/excalidraw/02-proposed-parallel-boot.excalidraw` | `diagrams/excalidraw/02-proposed-parallel-boot-light.png` |
+| New VMM interface hierarchy | `diagrams/excalidraw/03-vmm-interface-hierarchy.excalidraw` | `diagrams/excalidraw/03-vmm-interface-hierarchy-light.png` |
+| Firecracker HTTP API call sequence | `diagrams/excalidraw/04-firecracker-api-sequence.excalidraw` | `diagrams/excalidraw/04-firecracker-api-sequence-light.png` |
+| QEMU QMP call sequence | `diagrams/excalidraw/05-qemu-qmp-sequence.excalidraw` | `diagrams/excalidraw/05-qemu-qmp-sequence-light.png` |
+
+To regenerate them:
+
+```sh
+npm install
+node scripts/generate-excalidraw-diagrams.mjs
+npx diagramkit render diagrams/excalidraw --format png --theme light --same-folder --force --no-interactive
+```
 
 ## Run
 

@@ -229,110 +229,35 @@ The amount saved is the smaller of the overlapped monitor startup work and the u
 
 ### Diagram 1: Current Sequential VMM Boot Flow
 
-```text
-urunc create        reexec process        network/rootfs/hooks        VMM          guest
-     |                    |                       |                    |             |
-     | start reexec       |                       |                    |             |
-     |------------------->|                       |                    |             |
-     | write created      |                       |                    |             |
-     |<-------------------|                       |                    |             |
-     |                    | wait UC_START         |                    |             |
-urunc start               |                       |                    |             |
-     | send UC_START      |                       |                    |             |
-     |------------------->| setup everything      |                    |             |
-     |                    |---------------------->|                    |             |
-     |                    | build VMM command     |                    |             |
-     |                    | send RX_SUCCESS       |                    |             |
-     |<-------------------|                       |                    |             |
-     | mark running       | syscall.Exec          |                    |             |
-     |                    |------------------------------------------->| boot        |
-     |                    |                       |                    |------------>|
-```
+![Current sequential VMM boot flow](diagrams/excalidraw/01-current-sequential-boot-light.png)
+
+This sequence makes the current blocking path visible: urunc prepares the process, waits for the start signal, performs setup, then execs the VMM. Guest boot only begins after the serial runtime work is done.
 
 ### Diagram 2: Proposed Parallel VMM Boot Flow
 
-```text
-urunc create        reexec process        VMM control socket       network/rootfs/hooks       guest
-     |                    |                       |                         |                   |
-     | start reexec       |                       |                         |                   |
-     |------------------->| StartVMM              |                         |                   |
-     |                    |---------------------->| socket opening          |                   |
-     |                    | setup in parallel     |                         |                   |
-     |                    |------------------------------------------------>|                   |
-     | write created      |                       |                         |                   |
-     |<-------------------|                       |                         |                   |
-urunc start               |                       |                         |                   |
-     | send UC_START      |                       |                         |                   |
-     |------------------->| WaitForSocket         |                         |                   |
-     |                    | Configure devices     |<----------------------->|                   |
-     |                    | StartGuest            |------------------------>| boot              |
-     |<-------------------| RX_SUCCESS            |                         |------------------>|
-     | mark running       |                       |                         |                   |
-```
+![Proposed parallel VMM boot flow](diagrams/excalidraw/02-proposed-parallel-boot-light.png)
+
+This shows the new shape: StartVMM opens the control socket early while network, rootfs, and hooks proceed in parallel. StartGuest becomes the explicit handoff point.
 
 ### Diagram 3: New VMM Interface Shape
 
-```text
-                         +------------------+
-                         | VMM              |
-                         | BuildExecCmd     |
-                         | PreExec          |
-                         | Stop, Signal     |
-                         | Path, Ok         |
-                         +---------+--------+
-                                   |
-                    +--------------+--------------+
-                    |                             |
-          +---------v----------+        +---------v----------+
-          | SocketBootVMM      |        | Legacy VMM         |
-          | StartVMM           |        | HVT                |
-          | WaitForSocket      |        | SPT                |
-          | Configure          |        | current exec path  |
-          | StartGuest         |        +--------------------+
-          +----+-----------+---+
-               |           |
-      +--------v--+     +--v-------+
-      | Firecracker|     | QEMU QMP |
-      | HTTP API   |     | JSON API |
-      +------------+     +----------+
-```
+![New VMM interface hierarchy](diagrams/excalidraw/03-vmm-interface-hierarchy-light.png)
+
+This UML-style view separates the existing VMM contract from the optional socket-aware extension, so Firecracker and QEMU can use split boot without forcing Solo5 hvt and spt to grow fake socket behavior.
 
 ### Diagram 4: Firecracker HTTP API Call Sequence
 
-```text
-urunc                      Firecracker API socket                 microVM
-  | firecracker --api-sock        |                                  |
-  |------------------------------>| open Unix socket                  |
-  | wait ready                    |                                  |
-  |<------------------------------| accepts connection                |
-  | PUT /machine-config           |                                  |
-  |------------------------------>| 204                              |
-  | PUT /boot-source              |                                  |
-  |------------------------------>| 204                              |
-  | PUT /drives/rootfs            |                                  |
-  |------------------------------>| 204                              |
-  | PUT /network-interfaces/net1  |                                  |
-  |------------------------------>| 204                              |
-  | PUT /actions InstanceStart    |                                  |
-  |------------------------------>|--------------------------------->| boot
-```
+![Firecracker HTTP API call sequence](diagrams/excalidraw/04-firecracker-api-sequence-light.png)
+
+This timing diagram shows Firecracker starting with --api-sock, then receiving machine config, boot source, drives, network interfaces, and finally InstanceStart over the Unix socket.
 
 ### Diagram 5: QEMU QMP Call Sequence
 
-```text
-urunc                         QEMU with -S and QMP                  guest CPU
-  | qemu -S -qmp unix:...             |                                |
-  |---------------------------------->| open QMP socket, CPU paused     |
-  | connect                           |                                |
-  |<----------------------------------| {"QMP":{...}} greeting          |
-  | {"execute":"qmp_capabilities"}    |                                |
-  |---------------------------------->| {"return":{}}                   |
-  | setup finished                    |                                |
-  | {"execute":"cont"}                |                                |
-  |---------------------------------->| release paused CPU ------------>| boot
-```
+![QEMU QMP call sequence](diagrams/excalidraw/05-qemu-qmp-sequence-light.png)
 
-The diagrams above are embedded as ASCII so they survive code review, email, and Markdown rendering. I also kept Excalidraw source in the PoC repository for final proposal polish and design review with mentors.
+This sequence uses qemu -S with a Unix QMP socket. urunc negotiates qmp_capabilities while the guest CPU is paused, then sends cont when runtime setup is complete.
+
+The editable Excalidraw source files and PNG exports live in `diagrams/excalidraw/` so the diagrams can be reviewed and revised with mentors.
 
 ## 5. My Prior Work and Experience
 
