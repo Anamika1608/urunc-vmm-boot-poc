@@ -944,9 +944,9 @@
     {
       "id": "start_vmm",
       "type": "rectangle",
-      "x": 1385,
-      "y": 345,
-      "width": 180,
+      "x": 1525,
+      "y": 340,
+      "width": 240,
       "height": 58,
       "angle": 0,
       "strokeColor": "#6b7280",
@@ -973,9 +973,9 @@
     {
       "id": "start_vmm_text",
       "type": "text",
-      "x": 1397,
-      "y": 360,
-      "width": 156,
+      "x": 1537,
+      "y": 355,
+      "width": 216,
       "height": 28,
       "angle": 0,
       "strokeColor": "#374151",
@@ -1010,8 +1010,8 @@
       "type": "arrow",
       "x": 1177,
       "y": 365,
-      "width": 208,
-      "height": 9,
+      "width": 348,
+      "height": 4,
       "angle": 0,
       "strokeColor": "#111827",
       "backgroundColor": "transparent",
@@ -1039,8 +1039,8 @@
           0
         ],
         [
-          208,
-          9
+          348,
+          4
         ]
       ],
       "lastCommittedPoint": null,
@@ -1116,9 +1116,9 @@
     {
       "id": "boot_source",
       "type": "rectangle",
-      "x": 1390,
+      "x": 1525,
       "y": 480,
-      "width": 220,
+      "width": 240,
       "height": 78,
       "angle": 0,
       "strokeColor": "#6b7280",
@@ -1145,9 +1145,9 @@
     {
       "id": "boot_source_text",
       "type": "text",
-      "x": 1402,
+      "x": 1537,
       "y": 495,
-      "width": 196,
+      "width": 216,
       "height": 48,
       "angle": 0,
       "strokeColor": "#374151",
@@ -1180,9 +1180,9 @@
     {
       "id": "net",
       "type": "rectangle",
-      "x": 1390,
+      "x": 1525,
       "y": 610,
-      "width": 220,
+      "width": 240,
       "height": 58,
       "angle": 0,
       "strokeColor": "#6b7280",
@@ -1209,9 +1209,9 @@
     {
       "id": "net_text",
       "type": "text",
-      "x": 1402,
+      "x": 1537,
       "y": 625,
-      "width": 196,
+      "width": 216,
       "height": 28,
       "angle": 0,
       "strokeColor": "#374151",
@@ -1308,9 +1308,9 @@
     {
       "id": "storage",
       "type": "rectangle",
-      "x": 1390,
+      "x": 1525,
       "y": 735,
-      "width": 220,
+      "width": 240,
       "height": 58,
       "angle": 0,
       "strokeColor": "#6b7280",
@@ -1337,9 +1337,9 @@
     {
       "id": "storage_text",
       "type": "text",
-      "x": 1402,
+      "x": 1537,
       "y": 750,
-      "width": 196,
+      "width": 216,
       "height": 28,
       "angle": 0,
       "strokeColor": "#374151",
@@ -1816,7 +1816,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "m_start_guest_from",
+      "id": "start_guest_from",
       "type": "ellipse",
       "x": 1169,
       "y": 1022,
@@ -1847,7 +1847,7 @@
       "type": "arrow",
       "x": 1177,
       "y": 1030,
-      "width": 285,
+      "width": 348,
       "height": 0,
       "angle": 0,
       "strokeColor": "#1e40af",
@@ -1876,7 +1876,7 @@
           0
         ],
         [
-          285,
+          348,
           0
         ]
       ],
@@ -1889,12 +1889,12 @@
     {
       "id": "m_start_guest_label",
       "type": "text",
-      "x": 1195,
+      "x": 1257,
       "y": 1002,
-      "width": 249,
+      "width": 228,
       "height": 24,
       "angle": 0,
-      "strokeColor": "#374151",
+      "strokeColor": "#1e40af",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 1,
@@ -1924,9 +1924,9 @@
     {
       "id": "start_vm",
       "type": "rectangle",
-      "x": 1390,
+      "x": 1525,
       "y": 1065,
-      "width": 235,
+      "width": 240,
       "height": 70,
       "angle": 0,
       "strokeColor": "#1e40af",
@@ -1953,9 +1953,9 @@
     {
       "id": "start_vm_text",
       "type": "text",
-      "x": 1402,
+      "x": 1537,
       "y": 1086,
-      "width": 211,
+      "width": 216,
       "height": 28,
       "angle": 0,
       "strokeColor": "#374151",
@@ -1988,10 +1988,10 @@
     {
       "id": "parallel_band",
       "type": "line",
-      "x": 1480,
-      "y": 345,
+      "x": 1799,
+      "y": 340,
       "width": 0,
-      "height": 715,
+      "height": 795,
       "angle": 0,
       "strokeColor": "#3b82f6",
       "backgroundColor": "transparent",
@@ -2018,7 +2018,7 @@
         ],
         [
           0,
-          715
+          795
         ]
       ],
       "lastCommittedPoint": null,
@@ -2028,9 +2028,9 @@
     {
       "id": "api_label",
       "type": "text",
-      "x": 1554,
-      "y": 420,
-      "width": 190,
+      "x": 1821,
+      "y": 430,
+      "width": 210,
       "height": 84,
       "angle": 0,
       "strokeColor": "#1e40af",

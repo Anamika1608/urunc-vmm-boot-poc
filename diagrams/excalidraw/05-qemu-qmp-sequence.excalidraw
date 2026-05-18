@@ -284,7 +284,7 @@
     {
       "id": "qmp_actor_2",
       "type": "rectangle",
-      "x": 920,
+      "x": 1030,
       "y": 140,
       "width": 210,
       "height": 52,
@@ -313,7 +313,7 @@
     {
       "id": "qmp_actor_2_text",
       "type": "text",
-      "x": 932,
+      "x": 1042,
       "y": 152,
       "width": 186,
       "height": 28,
@@ -348,7 +348,7 @@
     {
       "id": "qmp_life_2",
       "type": "line",
-      "x": 1025,
+      "x": 1135,
       "y": 205,
       "width": 0,
       "height": 535,
@@ -785,7 +785,7 @@
       "type": "arrow",
       "x": 625,
       "y": 665,
-      "width": 400,
+      "width": 510,
       "height": 0,
       "angle": 0,
       "strokeColor": "#1e3a5f",
@@ -814,7 +814,7 @@
           0
         ],
         [
-          400,
+          510,
           0
         ]
       ],
@@ -829,7 +829,7 @@
       "type": "text",
       "x": 645,
       "y": 637,
-      "width": 360,
+      "width": 470,
       "height": 24,
       "angle": 0,
       "strokeColor": "#047857",

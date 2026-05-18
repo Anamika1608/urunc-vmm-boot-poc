@@ -244,22 +244,31 @@ function diagram2() {
   msg("m_create", 245, "shim", "create", "create");
   msg("m_reexec", 315, "create", "reexec", "setup terminal; exec in new netns");
   msg("m_booted", 390, "reexec", "create", 'IPC: "BOOTED"');
-  els.push(...rect("start_vmm", 1385, 345, 180, 58, "start VMM", "#f3f4f6", "#6b7280"));
-  els.push(arrow("reexec_to_start_vmm", centers.reexec, 365, 1385, 374, { color: "#111827" }));
+  const apiStepX = 1525;
+  const apiStepW = 240;
+  els.push(...rect("start_vmm", apiStepX, 340, apiStepW, 58, "start VMM", "#f3f4f6", "#6b7280"));
+  els.push(arrow("reexec_to_start_vmm", centers.reexec, 365, apiStepX, 369, { color: "#111827" }));
   els.push(...rect("runtime_hooks", 890, 445, 190, 68, "execute\ncreateRuntime\nhooks", "#dcfce7", "#047857"));
-  els.push(...rect("boot_source", 1390, 480, 220, 78, "set boot source\nand initrd", "#f3f4f6", "#6b7280"));
-  els.push(...rect("net", 1390, 610, 220, 58, "set networking", "#f3f4f6", "#6b7280"));
+  els.push(...rect("boot_source", apiStepX, 480, apiStepW, 78, "set boot source\nand initrd", "#f3f4f6", "#6b7280"));
+  els.push(...rect("net", apiStepX, 610, apiStepW, 58, "set networking", "#f3f4f6", "#6b7280"));
   els.push(...rect("tap", 1115, 610, 215, 58, "setup\ntap0_urunc", "#dcfce7", "#047857"));
-  els.push(...rect("storage", 1390, 735, 220, 58, "set storage", "#f3f4f6", "#6b7280"));
+  els.push(...rect("storage", apiStepX, 735, apiStepW, 58, "set storage", "#f3f4f6", "#6b7280"));
   els.push(...rect("unmount", 1115, 735, 215, 58, "unmount block\ndevice", "#dcfce7", "#047857"));
   msg("m_ok", 570, "create", "reexec", 'IPC: "OK"');
   msg("m_start", 825, "shim", "create", "start");
   msg("m_start_ipc", 875, "create", "reexec", 'IPC: "START"');
   els.push(...rect("start_hooks", 1115, 915, 230, 72, "execute\nstartContainer\nhooks", "#dcfce7", "#047857"));
-  msg("m_start_guest", 1030, "reexec", "api", "StartGuest / start VM", "#1e40af");
-  els.push(...rect("start_vm", 1390, 1065, 235, 70, "start VM", "#dbeafe", "#1e40af"));
-  els.push(line("parallel_band", centers.api + 18, 345, centers.api + 18, 1060, { strokeColor: "#3b82f6", strokeWidth: 6 }));
-  els.push(text("api_label", centers.api + 92, 420, 190, 84, "API requests land\nwhile runtime setup\ncontinues", { fontSize: 16, color: "#1e40af" }));
+  els.push(dot("start_guest_from", centers.reexec, 1030));
+  els.push(arrow("m_start_guest", centers.reexec, 1030, apiStepX, 1030, { color: "#1e40af" }));
+  els.push(text("m_start_guest_label", centers.reexec + 80, 1002, apiStepX - centers.reexec - 120, 24, "StartGuest / start VM", {
+    fontSize: 16,
+    color: "#1e40af",
+    align: "center",
+  }));
+  els.push(...rect("start_vm", apiStepX, 1065, apiStepW, 70, "start VM", "#dbeafe", "#1e40af"));
+  const bandX = apiStepX + apiStepW + 34;
+  els.push(line("parallel_band", bandX, 340, bandX, 1135, { strokeColor: "#3b82f6", strokeWidth: 6 }));
+  els.push(text("api_label", bandX + 22, 430, 210, 84, "API requests land\nwhile runtime setup\ncontinues", { fontSize: 16, color: "#1e40af" }));
   return els;
 }
 
@@ -311,7 +320,7 @@ function diagram4() {
   const els = [
     ...title("Firecracker socket-first boot", "All device and boot configuration is sent before the final InstanceStart action."),
   ];
-  const xs = [110, 480, 850];
+  const xs = [110, 480, 1030];
   const labels = ["urunc", "Firecracker API socket", "microVM"];
   labels.forEach((label, i) => {
     els.push(...rect(`fc_actor_${i}`, xs[i], 140, 210, 52, label, i === 2 ? "#a7f3d0" : "#dbeafe", i === 2 ? "#047857" : "#1e3a5f"));
@@ -323,7 +332,7 @@ function diagram4() {
     [400, "PUT /drives/rootfs", 215, 585],
     [475, "PUT /network-interfaces/net1", 215, 585],
     [550, "PUT /actions { InstanceStart }", 215, 585],
-    [625, "guest boot", 585, 955],
+    [625, "guest boot", 585, 1135],
   ];
   for (const [y, label, x1, x2] of calls) {
     els.push(arrow(`fc_call_${y}`, x1, y, x2, y));
@@ -342,7 +351,7 @@ function diagram5() {
   const els = [
     ...title("QEMU QMP paused boot", "QEMU starts with the guest CPU stopped. QMP cont releases execution after urunc setup."),
   ];
-  const xs = [130, 520, 920];
+  const xs = [130, 520, 1030];
   const labels = ["urunc", "QEMU QMP socket", "guest CPU"];
   labels.forEach((label, i) => {
     els.push(...rect(`qmp_actor_${i}`, xs[i], 140, 210, 52, label, i === 2 ? "#a7f3d0" : "#dbeafe", i === 2 ? "#047857" : "#1e3a5f"));
@@ -354,7 +363,7 @@ function diagram5() {
     [420, "{ execute: qmp_capabilities }", 235, 625],
     [500, "{ return: {} }", 625, 235],
     [585, "{ execute: cont }", 235, 625],
-    [665, "CPU released, guest boots", 625, 1025],
+    [665, "CPU released, guest boots", 625, 1135],
   ];
   for (const [y, label, x1, x2] of calls) {
     els.push(arrow(`qmp_call_${y}`, x1, y, x2, y));
