@@ -115,9 +115,10 @@ function arrow(id, x1, y1, x2, y2, opts = {}) {
 
 function line(id, x1, y1, x2, y2, opts = {}) {
   return common(id, "line", x1, y1, x2 - x1, y2 - y1, {
-    strokeColor: opts.color ?? "#64748b",
+    strokeColor: opts.color ?? opts.strokeColor ?? "#64748b",
     backgroundColor: "transparent",
     strokeStyle: opts.strokeStyle ?? "solid",
+    strokeWidth: opts.strokeWidth ?? 2,
     points: [
       [0, 0],
       [x2 - x1, y2 - y1],
@@ -125,6 +126,22 @@ function line(id, x1, y1, x2, y2, opts = {}) {
     lastCommittedPoint: null,
     startBinding: null,
     endBinding: null,
+  });
+}
+
+function frame(id, x, y, w, h, fill, stroke, strokeWidth = 2) {
+  return common(id, "rectangle", x, y, w, h, {
+    backgroundColor: fill,
+    strokeColor: stroke,
+    strokeWidth,
+  });
+}
+
+function dot(id, x, y, r = 8, color = "#111827") {
+  return common(id, "ellipse", x - r, y - r, r * 2, r * 2, {
+    backgroundColor: color,
+    strokeColor: color,
+    roughness: 0.6,
   });
 }
 
@@ -141,85 +158,152 @@ function write(name, elements) {
 
 function diagram1() {
   const els = [
-    ...title("Current sequential VMM boot flow", "The monitor is the last opaque execve step, so VMM startup cannot overlap with urunc setup."),
+    ...title("Current exec-mode urunc lifecycle", "The VMM is the final exec step, so monitor startup cannot overlap with create/start setup."),
   ];
-  const actors = [
-    ["cli", "urunc CLI", 90, 150],
-    ["reexec", "reexec process", 340, 150],
-    ["setup", "network/rootfs/hooks", 600, 190],
-    ["vmm", "VMM process", 900, 150],
-    ["guest", "guest", 1130, 150],
+
+  els.push(text("left_title", 70, 165, 360, 42, "What blocks today", { fontSize: 28, color: "#374151" }));
+  els.push(text("left_bullets", 90, 230, 360, 230,
+    "- urunc uses exec mode\n- reexec waits for START\n- network/storage/hooks run first\n- VMM starts only at the end",
+    { fontSize: 21, color: "#64748b" }));
+  els.push(...rect("blocked_note", 75, 520, 350, 92, "No VMM API socket exists\nwhile setup is running", "#fee2e2", "#dc2626"));
+
+  const lanes = [
+    ["shim", "containerd-shim", 560, "#fef3c7", "#b45309"],
+    ["create", "urunc create", 815, "#fee2e2", "#dc2626"],
+    ["reexec", "urunc create\n--reexec", 1090, "#fee2e2", "#dc2626"],
+    ["vm", "unikernel VM", 1370, "#dbeafe", "#1e40af"],
   ];
-  for (const [id, label, x, w] of actors) {
-    const center = x + w / 2;
-    els.push(...rect(`${id}_actor`, x, 140, w, 52, label, "#dbeafe"));
-    els.push(line(`${id}_life`, center, 205, center, 760, { strokeStyle: "dashed" }));
+  const centers = {};
+  for (const [id, label, x, fill, stroke] of lanes) {
+    centers[id] = x + 92;
+    els.push(...rect(`${id}_box`, x, 130, 184, 64, label, fill, stroke));
+    els.push(line(`${id}_life`, centers[id], 210, centers[id], 820, { strokeColor: "#111827" }));
   }
-  const msgs = [
-    [210, 165, 415, "start reexec"],
-    [280, 415, 165, "created state"],
-    [355, 165, 415, "UC_START"],
-    [430, 415, 695, "setup net/rootfs/hooks"],
-    [505, 415, 695, "BuildExecCmd"],
-    [580, 415, 165, "RX_SUCCESS"],
-    [655, 415, 975, "syscall.Exec(vmm.Path(), args, env)"],
-    [720, 975, 1205, "guest boot begins"],
-  ];
-  for (const [y, x1, x2, label] of msgs) {
-    els.push(arrow(`msg_${y}`, x1, y, x2, y));
-    els.push(text(`msg_${y}_label`, Math.min(x1, x2) + 18, y - 28, Math.abs(x2 - x1) - 28, 24, label, {
-      fontSize: 15,
+
+  const msg = (id, y, from, to, label, color = "#111827") => {
+    els.push(dot(`${id}_from`, centers[from], y));
+    els.push(arrow(id, centers[from], y, centers[to], y, { color }));
+    els.push(text(`${id}_label`, Math.min(centers[from], centers[to]) + 18, y - 28, Math.abs(centers[to] - centers[from]) - 36, 24, label, {
+      fontSize: 16,
       color: "#374151",
       align: "center",
     }));
-  }
-  els.push(...code("evidence", 720, 250, 470, 130, `Firecracker: --no-api --config-file /tmp/fc.json\nQEMU:       -monitor null\nFinal step: syscall.Exec(...)`));
-  els.push(...rect("dead_time", 745, 450, 390, 64, "No socket control before guest launch", "#fee2e2", "#dc2626"));
+  };
+  msg("m_create", 245, "shim", "create", "create");
+  msg("m_reexec", 315, "create", "reexec", "setup terminal; exec in new netns");
+  msg("m_booted", 395, "reexec", "create", 'IPC: "BOOTED"');
+  els.push(...rect("save_pid", 600, 365, 160, 60, "save reexec\nPID", "#dcfce7", "#047857"));
+  els.push(...rect("runtime_hooks", 875, 435, 180, 68, "execute\ncreateRuntime\nhooks", "#dcfce7", "#047857"));
+  els.push(dot("create_dot_1", centers.create, 520));
+  els.push(...rect("container_hooks", 610, 535, 190, 68, "execute\ncreateContainer\nhooks", "#dcfce7", "#047857"));
+  els.push(arrow("container_hooks_arrow", 800, 570, centers.create, 570, { color: "#111827" }));
+  msg("m_ok", 635, "create", "reexec", 'IPC: "OK"');
+  msg("m_start", 730, "shim", "create", "start");
+  msg("m_start_ipc", 785, "create", "reexec", 'IPC: "START"');
+  els.push(...rect("setup_net", 1280, 505, 190, 60, "setup\ntap0_urunc", "#dcfce7", "#047857"));
+  els.push(...rect("unmount", 985, 670, 190, 60, "unmount block\ndevice", "#dcfce7", "#047857"));
+  els.push(...rect("start_hooks", 1275, 650, 220, 70, "execute\nstartContainer\nhooks", "#dcfce7", "#047857"));
+  els.push(...rect("exec_vm", 1265, 805, 235, 78, "execve\nunikernel VM", "#dbeafe", "#1e40af"));
+  els.push(line("late_bar", centers.reexec + 12, 400, centers.reexec + 12, 810, { strokeColor: "#dc2626", strokeWidth: 6 }));
+  els.push(text("late_label", centers.reexec + 28, 430, 205, 64, "VMM launch is still\nbehind setup work", { fontSize: 17, color: "#dc2626" }));
   return els;
 }
 
 function diagram2() {
   const els = [
-    ...title("Proposed parallel VMM boot flow", "Start the monitor early, wait for its control socket, and release the guest only after OCI start."),
+    ...title("Updated background-mode urunc lifecycle", "Use the time between create and start to spawn the VMM and configure it through the monitor API."),
   ];
+
+  els.push(text("left_title", 65, 150, 390, 42, "Use create to start gap", { fontSize: 28, color: "#374151" }));
+  els.push(text("left_bullets", 88, 220, 400, 320,
+    "Create:\n  - start VMM process\n  - send available requests\n  - set up storage/network\n  - set remaining requests\n\nStart:\n  - run hooks\n  - start VM",
+    { fontSize: 21, color: "#64748b" }));
+  els.push(...rect("gain_note", 80, 595, 340, 82, "Background mode targets\n30-40 ms faster spawn time", "#dcfce7", "#047857"));
+
   const lanes = [
-    ["create", "urunc create", 90, "#fed7aa", "#c2410c"],
-    ["vmm", "StartVMM and socket open", 330, "#60a5fa", "#1e3a5f"],
-    ["setup", "network/rootfs/hooks", 330, "#93c5fd", "#1e3a5f"],
-    ["start", "urunc start", 790, "#fed7aa", "#c2410c"],
-    ["guest", "guest boot", 1040, "#a7f3d0", "#047857"],
+    ["shim", "containerd-shim", 560, "#fef3c7", "#b45309"],
+    ["create", "urunc create", 820, "#fee2e2", "#dc2626"],
+    ["reexec", "urunc create\n--reexec", 1085, "#fee2e2", "#dc2626"],
+    ["api", "VMM process\n+ API socket", 1370, "#dbeafe", "#1e40af"],
   ];
-  els.push(...rect("create_box", 70, 180, 230, 76, "create\nstate: created", "#fed7aa", "#c2410c"));
-  els.push(...rect("vmm_bar", 380, 165, 360, 58, "go StartVMM()", "#60a5fa"));
-  els.push(...rect("setup_bar", 380, 265, 360, 58, "setup network, rootfs, hooks", "#93c5fd"));
-  els.push(...rect("socket_ready", 770, 165, 170, 58, "socket ready", "#a7f3d0", "#047857"));
-  els.push(...rect("start_box", 780, 365, 240, 86, "Configure\nStartGuest", "#fed7aa", "#c2410c"));
-  els.push(...rect("guest_box", 1100, 365, 180, 70, "guest boots", "#a7f3d0", "#047857"));
-  els.push(arrow("create_to_vmm", 300, 205, 380, 195));
-  els.push(arrow("create_to_setup", 300, 224, 380, 292));
-  els.push(arrow("vmm_to_ready", 740, 195, 770, 195));
-  els.push(arrow("setup_to_start", 740, 292, 770, 398));
-  els.push(arrow("ready_to_start", 855, 223, 855, 365));
-  els.push(arrow("start_to_guest", 1020, 400, 1100, 400));
-  els.push(...rect("parallel_note", 360, 345, 365, 78, "Critical path saves overlapped\nVMM startup and urunc setup", "#dcfce7", "#047857"));
-  els.push(...code("state_evidence", 80, 500, 1080, 140, `create: monitor may be spawned or paused, but OCI state remains created\nstart: WaitForSocket -> Configure -> StartGuest -> mark running\nfailure: timeout or monitor exit prevents transition to running`));
+  const centers = {};
+  for (const [id, label, x, fill, stroke] of lanes) {
+    centers[id] = x + 92;
+    els.push(...rect(`${id}_box`, x, 130, 184, 64, label, fill, stroke));
+    els.push(line(`${id}_life`, centers[id], 210, centers[id], 1130, { strokeColor: "#111827" }));
+  }
+  const msg = (id, y, from, to, label, color = "#111827") => {
+    els.push(dot(`${id}_from`, centers[from], y));
+    els.push(arrow(id, centers[from], y, centers[to], y, { color }));
+    els.push(text(`${id}_label`, Math.min(centers[from], centers[to]) + 18, y - 28, Math.abs(centers[to] - centers[from]) - 36, 24, label, {
+      fontSize: 16,
+      color: "#374151",
+      align: "center",
+    }));
+  };
+  msg("m_create", 245, "shim", "create", "create");
+  msg("m_reexec", 315, "create", "reexec", "setup terminal; exec in new netns");
+  msg("m_booted", 390, "reexec", "create", 'IPC: "BOOTED"');
+  els.push(...rect("start_vmm", 1385, 345, 180, 58, "start VMM", "#f3f4f6", "#6b7280"));
+  els.push(arrow("reexec_to_start_vmm", centers.reexec, 365, 1385, 374, { color: "#111827" }));
+  els.push(...rect("runtime_hooks", 890, 445, 190, 68, "execute\ncreateRuntime\nhooks", "#dcfce7", "#047857"));
+  els.push(...rect("boot_source", 1390, 480, 220, 78, "set boot source\nand initrd", "#f3f4f6", "#6b7280"));
+  els.push(...rect("net", 1390, 610, 220, 58, "set networking", "#f3f4f6", "#6b7280"));
+  els.push(...rect("tap", 1115, 610, 215, 58, "setup\ntap0_urunc", "#dcfce7", "#047857"));
+  els.push(...rect("storage", 1390, 735, 220, 58, "set storage", "#f3f4f6", "#6b7280"));
+  els.push(...rect("unmount", 1115, 735, 215, 58, "unmount block\ndevice", "#dcfce7", "#047857"));
+  msg("m_ok", 570, "create", "reexec", 'IPC: "OK"');
+  msg("m_start", 825, "shim", "create", "start");
+  msg("m_start_ipc", 875, "create", "reexec", 'IPC: "START"');
+  els.push(...rect("start_hooks", 1115, 915, 230, 72, "execute\nstartContainer\nhooks", "#dcfce7", "#047857"));
+  msg("m_start_guest", 1030, "reexec", "api", "StartGuest / start VM", "#1e40af");
+  els.push(...rect("start_vm", 1390, 1065, 235, 70, "start VM", "#dbeafe", "#1e40af"));
+  els.push(line("parallel_band", centers.api + 18, 345, centers.api + 18, 1060, { strokeColor: "#3b82f6", strokeWidth: 6 }));
+  els.push(text("api_label", centers.api + 92, 420, 190, 84, "API requests land\nwhile runtime setup\ncontinues", { fontSize: 16, color: "#1e40af" }));
   return els;
 }
 
 function diagram3() {
   const els = [
-    ...title("VMM interface split", "Socket-capable monitors opt into split boot. Legacy monitors keep the old exec path."),
+    ...title("Who controls the VMM API?", "The maintainer notes this ownership choice is central to background-mode VMM management."),
   ];
-  els.push(...rect("vmm_iface", 480, 150, 330, 145, "VMM\nBuildExecCmd\nPreExec\nStop / Signal / Path", "#dbeafe"));
-  els.push(...rect("socket_iface", 150, 370, 360, 190, "SocketBootVMM\nStartVMM(ctx,args)\nWaitForSocket(timeout)\nConfigure(ctx,args)\nStartGuest(ctx)", "#a7f3d0", "#047857"));
-  els.push(...rect("legacy_iface", 790, 370, 330, 170, "Legacy VMM\nHVT / SPT\nold exec path", "#fee2e2", "#dc2626"));
-  els.push(...rect("fc_impl", 90, 670, 250, 85, "Firecracker\nHTTP over Unix socket", "#60a5fa"));
-  els.push(...rect("qemu_impl", 430, 670, 250, 85, "QEMU\nQMP JSON socket", "#60a5fa"));
-  els.push(arrow("vmm_to_socket", 540, 295, 360, 370));
-  els.push(arrow("vmm_to_legacy", 755, 295, 955, 370));
-  els.push(arrow("socket_to_fc", 270, 560, 215, 670));
-  els.push(arrow("socket_to_qemu", 420, 560, 555, 670));
-  els.push(...code("go_evidence", 705, 645, 430, 145, `type SocketBootVMM interface {\n  StartVMM(ctx, args) error\n  WaitForSocket(timeout) error\n  Configure(ctx, args) error\n  StartGuest(ctx) error\n}`));
+
+  const cards = [
+    ["a", 70, 170, 360, 470, "#dbeafe", "#1e40af", "A. containerd-side urunc", "Cleaner API owner\nLess IPC communication\n\nRisk:\nnetwork setup may be harder\nbecause the API caller is not\ninside the reexec namespace"],
+    ["b", 500, 170, 360, 470, "#fef3c7", "#b45309", "B. reexec process", "Easier namespace access\nNetworking setup is local\n\nCost:\nreexec becomes a mediator\nand extra IPC remains"],
+    ["c", 930, 170, 420, 470, "#dcfce7", "#047857", "C. hybrid control", "reexec sets up networking\ncontainerd-side urunc talks\ndirectly to the VMM API\n\nThis matches the slide deck's\n\"Both\" option and keeps HVT/SPT\non the old exec path"],
+  ];
+
+  for (const [id, x, y, w, h, fill, stroke, heading, body] of cards) {
+    els.push(frame(`${id}_frame`, x, y, w, h, fill, stroke, 3));
+    els.push(text(`${id}_heading`, x + 28, y + 34, w - 56, 34, heading, {
+      fontSize: 22,
+      color: stroke,
+      align: "center",
+    }));
+    els.push(line(`${id}_rule`, x + 28, y + 86, x + w - 28, y + 86, { strokeColor: stroke, strokeWidth: 3 }));
+    els.push(text(`${id}_body`, x + 36, y + 120, w - 72, 230, body, {
+      fontSize: 17,
+      color: "#374151",
+    }));
+  }
+
+  els.push(...rect("a_urunc", 125, 525, 110, 48, "urunc", "#fed7aa", "#c2410c"));
+  els.push(...rect("a_api", 295, 525, 110, 48, "VMM API", "#a7f3d0", "#047857"));
+  els.push(arrow("a_arrow", 235, 549, 295, 549, { color: "#1e40af" }));
+
+  els.push(...rect("b_reexec", 555, 525, 110, 48, "reexec", "#fee2e2", "#dc2626"));
+  els.push(...rect("b_api", 725, 525, 110, 48, "VMM API", "#a7f3d0", "#047857"));
+  els.push(arrow("b_arrow", 665, 549, 725, 549, { color: "#b45309" }));
+
+  els.push(...rect("c_reexec", 965, 525, 112, 48, "reexec", "#fee2e2", "#dc2626"));
+  els.push(...rect("c_urunc", 1105, 525, 112, 48, "urunc", "#fed7aa", "#c2410c"));
+  els.push(...rect("c_api", 1228, 525, 112, 48, "VMM API", "#a7f3d0", "#047857"));
+  els.push(arrow("c_net", 1021, 573, 1021, 610, { color: "#047857" }));
+  els.push(text("c_net_label", 945, 612, 150, 28, "network setup", { fontSize: 14, color: "#047857", align: "center" }));
+  els.push(arrow("c_api_arrow", 1217, 549, 1228, 549, { color: "#047857" }));
+
+  els.push(...code("api_evidence", 220, 705, 930, 128, `Monitor APIs are JSON over Unix sockets:\nQEMU monitor:      QMP over unix socket\nFirecracker API:   HTTP/JSON over unix socket\nDecision point:    who owns the socket client and process lifecycle?`));
   return els;
 }
 
