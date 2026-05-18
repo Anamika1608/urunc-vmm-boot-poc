@@ -3,7 +3,7 @@
   "diagrams": {
     "01-current-sequential-boot.excalidraw": {
       "hash": "sha256:0571418c8e53a8ae",
-      "generatedAt": "2026-05-18T13:21:08.698Z",
+      "generatedAt": "2026-05-18T13:42:27.517Z",
       "outputs": [
         {
           "file": "01-current-sequential-boot-light.png",
@@ -19,12 +19,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1779110466321.6274,
+      "mtimeMs": 1779111738796.402,
       "size": 42180
     },
     "02-proposed-parallel-boot.excalidraw": {
       "hash": "sha256:e2046d219d318154",
-      "generatedAt": "2026-05-18T13:21:08.698Z",
+      "generatedAt": "2026-05-18T13:42:27.517Z",
       "outputs": [
         {
           "file": "02-proposed-parallel-boot-light.png",
@@ -40,12 +40,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1779110466322.0396,
+      "mtimeMs": 1779111738796.7314,
       "size": 46973
     },
     "03-vmm-interface-hierarchy.excalidraw": {
-      "hash": "sha256:dc9ab630d3802655",
-      "generatedAt": "2026-05-18T13:21:08.698Z",
+      "hash": "sha256:26380568065b69d5",
+      "generatedAt": "2026-05-18T13:42:27.517Z",
       "outputs": [
         {
           "file": "03-vmm-interface-hierarchy-light.png",
@@ -61,12 +61,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1779110466322.246,
-      "size": 28413
+      "mtimeMs": 1779111738796.927,
+      "size": 28431
     },
     "04-firecracker-api-sequence.excalidraw": {
       "hash": "sha256:5bac83b8b96d34be",
-      "generatedAt": "2026-05-18T13:21:08.698Z",
+      "generatedAt": "2026-05-18T13:42:27.517Z",
       "outputs": [
         {
           "file": "04-firecracker-api-sequence-light.png",
@@ -82,12 +82,12 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1779110466322.3862,
+      "mtimeMs": 1779111738797.0854,
       "size": 22476
     },
     "05-qemu-qmp-sequence.excalidraw": {
       "hash": "sha256:2fcbf6919a3ba430",
-      "generatedAt": "2026-05-18T13:21:08.698Z",
+      "generatedAt": "2026-05-18T13:42:27.517Z",
       "outputs": [
         {
           "file": "05-qemu-qmp-sequence-light.png",
@@ -103,7 +103,7 @@
         "png"
       ],
       "theme": "light",
-      "mtimeMs": 1779110466322.5164,
+      "mtimeMs": 1779111738797.4333,
       "size": 22443
     }
   }

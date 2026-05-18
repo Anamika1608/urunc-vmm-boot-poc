@@ -274,7 +274,7 @@ function diagram2() {
 
 function diagram3() {
   const els = [
-    ...title("Who controls the VMM API?", "The maintainer notes this ownership choice is central to background-mode VMM management."),
+    ...title("Who controls the VMM API?", "Charalampos Mainas called out this ownership choice as central to background-mode VMM management."),
   ];
 
   const cards = [
